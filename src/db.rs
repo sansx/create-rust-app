@@ -5,7 +5,7 @@ use inflector::Inflector;
 use std::path::PathBuf;
 
 fn get_migration_number() -> usize {
-    let migrations_dir = PathBuf::from("migrations");
+    let migrations_dir = PathBuf::from("backend/migrations");
 
     if !migrations_dir.is_dir() {
         logger::message("Migrations directory does not exist, create it?");
@@ -20,7 +20,7 @@ fn get_migration_number() -> usize {
 }
 
 pub fn create_migration(name: &str, up: &str, down: &str) -> Result<()> {
-    let mut migrations_dir = PathBuf::from("migrations");
+    let mut migrations_dir = PathBuf::from("backend/migrations");
     ensure_directory(&migrations_dir, true)?;
 
     let migration_number = get_migration_number();
@@ -29,8 +29,11 @@ pub fn create_migration(name: &str, up: &str, down: &str) -> Result<()> {
     migrations_dir.push(&migration_dir_name);
     ensure_directory(&migrations_dir, false)?;
 
-    let up_file = PathBuf::from(format!("migrations/{}/up.sql", migration_dir_name));
-    let down_file = PathBuf::from(format!("migrations/{}/down.sql", migration_dir_name));
+    let up_file = PathBuf::from(format!("backend/migrations/{}/up.sql", migration_dir_name));
+    let down_file = PathBuf::from(format!(
+        "backend/migrations/{}/down.sql",
+        migration_dir_name
+    ));
     ensure_file(&up_file, Some(up))?;
     ensure_file(&down_file, Some(down))?;
 
