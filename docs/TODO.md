@@ -14,7 +14,6 @@
 - [ ] Remove all plugins, just have a single template which builds the project
 - [ ] Move `bin/*` into `.cargo/*`
 - [ ] Move `target-dir="backend/.build"` into `.cargo`
-- [ ] Move `migrations` folder to `backend/migrations`
 
 # Done
 
@@ -23,6 +22,16 @@
 - [x] Validate project name
 
 # Needs thought
+
+- [x] Move `migrations` folder to `backend/migrations`
+
+  NOTE: I attempted this but the diesel_cli doesn't respect what is written in `diesel.toml` (so something like `diesel database reset` doesn't work...):
+
+  ```
+  [migrations_directory]
+  file="backend/migrations"
+  dir="backend/migrations"
+  ```
 
 - [x] Admin REPL: evcxr (see https://depth-first.com/articles/2020/09/21/interactive-rust-in-a-repl-and-jupyter-notebook-with-evcxr/)
 
