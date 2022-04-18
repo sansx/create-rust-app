@@ -240,19 +240,7 @@ pub fn create(project_name: &str, creation_options: CreationOptions) -> Result<(
         Finalize; create the initial commit.
     */
 
-    logger::command_msg("git init");
-
-    let git_init = std::process::Command::new("git")
-        .current_dir(&project_dir)
-        .arg("init")
-        .stdout(std::process::Stdio::null())
-        .status()
-        .expect("failed to execute process");
-
-    if !git_init.success() {
-        logger::error("Failed to execute `git init`");
-        std::process::exit(1);
-    }
+    running_cmd(Vec::from(["git","init"]), project_dir.to_str().unwrap())?;
 
     logger::command_msg("git config user.name");
 
@@ -314,53 +302,37 @@ pub fn create(project_name: &str, creation_options: CreationOptions) -> Result<(
         }
     }
 
-    logger::command_msg("git add -A");
+    running_cmd(Vec::from(["git", "add", "-A"]), project_dir.to_str().unwrap())?;
 
-    let git_add = std::process::Command::new("git")
-        .current_dir(&project_dir)
-        .arg("add")
-        .arg("-A")
+    running_cmd(Vec::from(["git", "commit", "-m", "Initial commit"]), project_dir.to_str().unwrap())?;
+
+    running_cmd(Vec::from(["git", "branch", "-M", "main"]), project_dir.to_str().unwrap())?;
+
+    Ok(())
+}
+
+fn running_cmd(commands: Vec<&str>, project_dir: &str) -> Result<()> {
+    // ["git","branch", "-M","main"]
+    let mut program = commands.clone();
+    let args: Vec<_> = program.drain(1..).collect();
+    let full_cmd : String = commands.iter().enumerate().map( |(idx, str)|  if idx == 0 {
+      str.to_string()
+    }else {
+        String::from(" ") + str
+    }).collect();
+    logger::command_msg(full_cmd.as_str());
+    
+    let cmd_process = std::process::Command::new(program[0].clone())
+        .current_dir(project_dir)
+        .args(args)
         .stdout(std::process::Stdio::null())
         .status()
         .expect("failed to execute process");
 
-    if !git_add.success() {
-        logger::error("Failed to execute `git add -A`");
+    if !cmd_process.success() {
+        logger::error(format!("Failed to execute `{}`", full_cmd).as_str());
         std::process::exit(1);
     }
-
-    logger::command_msg("git commit -m Initial commit");
-
-    let git_commit = std::process::Command::new("git")
-        .current_dir(&project_dir)
-        .arg("commit")
-        .arg("-m")
-        .arg("Initial commit")
-        .stdout(std::process::Stdio::null())
-        .status()
-        .expect("failed to execute process");
-
-    if !git_commit.success() {
-        logger::error("Failed to execute `git commit`");
-        std::process::exit(1);
-    }
-
-    logger::command_msg("git branch -M main");
-
-    let git_branch = std::process::Command::new("git")
-        .current_dir(&project_dir)
-        .arg("branch")
-        .arg("-M")
-        .arg("main")
-        .stdout(std::process::Stdio::null())
-        .status()
-        .expect("failed to execute process");
-
-    if !git_branch.success() {
-        logger::error("Failed to execute `git branch -M main`");
-        std::process::exit(1);
-    }
-
     Ok(())
 }
 
